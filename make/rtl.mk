@@ -9,6 +9,18 @@ ifdef SN_TOOLCHAIN_MK_READ
 # Sentinel to test that rtl.mk has been included and read
 SN_RTL_MK_READ = 1
 
+SN_SPATZ_PACE ?= OFF
+ifeq ($(SN_SPATZ_PACE), ON)
+SN_COMMON_BENDER_FLAGS += -t spatz_pace
+endif
+
+# The generated Spatz package selects two VLSU interfaces for double BW;
+# compile the matching RTL branches whenever that configuration is selected.
+SN_SPATZ_DOUBLE_BW ?= OFF
+ifeq ($(SN_SPATZ_DOUBLE_BW), ON)
+SN_COMMON_BENDER_FLAGS += -DDOUBLE_BW -DBUF_FPU
+endif
+
 # Directories
 SN_BOOTROM_DIR ?= $(SN_HW_DIR)/bootrom
 
@@ -30,19 +42,6 @@ SN_SPATZ_HW_DIR  = $(shell $(SN_BENDER) path spatz_vpu)/hw
 SN_SPATZ_CFG     = $(SN_GEN_DIR)/spatz_cfg.json
 SN_SPATZ_PKG_TPL = $(SN_SPATZ_HW_DIR)/src/spatz_pkg.sv.tpl
 SN_SPATZ_PKG     = $(SN_GEN_DIR)/spatz_pkg.sv
-
-# Derive DOUBLE_BW from the effective cfg's double_bw field, so it can't drift from spatz_pkg.sv.
-SN_SPATZ_EFFECTIVE_CFG := $(if $(CFG_OVERRIDE),$(CFG_OVERRIDE),$(if $(wildcard $(SN_CFG)),$(SN_CFG),$(SN_DEFAULT_CFG)))
-SN_SPATZ_CFG_PREVIEW   := $(shell $(SN_CLUSTER_GEN) -c $(SN_SPATZ_EFFECTIVE_CFG) -o /dev/stdout --template $(SN_SPATZ_CFG_TPL) 2>/dev/null)
-ifneq ($(findstring "double_bw": true,$(SN_SPATZ_CFG_PREVIEW)),)
-SN_COMMON_BENDER_FLAGS += -DDOUBLE_BW
-endif
-ifneq ($(findstring "buf_fpu": 1,$(SN_SPATZ_CFG_PREVIEW)),)
-SN_COMMON_BENDER_FLAGS += -DBUF_FPU
-endif
-ifneq ($(findstring "pace": true,$(SN_SPATZ_CFG_PREVIEW)),)
-SN_COMMON_BENDER_FLAGS += -DPACE
-endif
 
 # All generated RTL sources
 SN_GEN_RTL_SRCS = $(SN_CLUSTER_WRAPPER_PKG) $(SN_CLUSTER_ADDRMAP_SVH) $(SN_CLUSTER_PERIPH) $(SN_CLUSTER_PERIPH_PKG) $(SN_BOOTROM) $(SN_SPATZ_PKG)
