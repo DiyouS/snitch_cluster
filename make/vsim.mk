@@ -38,6 +38,11 @@ ifeq ($(DEBUG), ON)
 SN_VSIM_FLAGS += -do "log -r /*"
 SN_VOPT_FLAGS  = +acc
 endif
+
+# Questa 2023.4 needs PACE payload structs to remain visible during elaboration.
+ifeq ($(SN_SPATZ_PACE), ON)
+SN_VOPT_FLAGS += +acc
+endif
 # TRACE flag allows to disable logging core traces (enabled by default)
 ifeq ($(TRACE), OFF)
 SN_VLOG_FLAGS += +define+TRACE_OFF
