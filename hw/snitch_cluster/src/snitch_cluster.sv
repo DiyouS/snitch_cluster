@@ -1442,7 +1442,7 @@ module snitch_cluster
     .NrPorts (NrCores),
     .req_chan_t (lsu_req_chan_t),
     .rsp_chan_t (lsu_rsp_chan_t),
-    .RspDepth (2)
+    .RspDepth (4)
   ) i_reqrsp_mux_core (
     .clk_i,
     .rst_ni,
